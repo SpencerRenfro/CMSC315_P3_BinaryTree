@@ -18,6 +18,8 @@ public class Main {
         while (!isValidTreeSyntax || continueInput != 'n') {
             System.out.print("Enter a binary tree: ");
             String userInput = input.nextLine();
+            //remove white spaces from the input
+            userInput = userInput.replaceAll("\\s+", "");
             String[] splitIntegers = userInput.split("[^0-9]+");
 
 
@@ -39,6 +41,16 @@ public class Main {
             System.out.println("This will be more tree output");
             System.out.println("Do you want to enter another binary tree? (y/n)");
             continueInput = input.nextLine().charAt(0);
+            // check if the user input an invalid character
+            if (continueInput != 'y' && continueInput != 'n') {
+                System.out.println("Invalid input, please enter 'y' or 'n'");
+                continueInput = 'y';
+            } else if (continueInput == 'y') {
+                isValidTreeSyntax = false; // reset the flag for the next iteration
+                extractedIntegersFromUserInput.clear(); // clear the list for the next input
+            } else {
+                System.out.println("Exiting program.");
+            }
 
 
         }

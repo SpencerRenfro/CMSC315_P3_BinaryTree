@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Test {
+public class Test4 {
 
     public static class Node {
         public int level;
