@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Stack;
 
 public final class BinaryTree {
@@ -24,11 +24,7 @@ public final class BinaryTree {
             throw new InvalidTreeSyntaxException(String.join("\n", errorMessages));
         }
     }
-    //constructor that accepts an array list of integers and constructs a balanced binary search
-    //tree containing those values
-    public BinaryTree(ArrayList<Integer> treeArray){
 
-    }
 
     // public method that prints the indented tree
     public void printIndentedTree() {
@@ -93,7 +89,7 @@ public final class BinaryTree {
     }
 
     // check for valid input
-    private boolean isValidInput(String userInput) throws InvalidTreeSyntaxException {
+    private boolean isValidInput(String userInput){
         boolean isValid = true;
         Stack<Character> stack = new Stack<>();
         // check for valid input
@@ -162,25 +158,11 @@ public final class BinaryTree {
 
         return isValid;
     }
-    private void parseInput(String userInput) {
-      String[] leftParenthesis = userInput.split("\\(");
-      int nestedLevel = 0;
-      for(int i = 0; i < userInput.length(); i++){
-          char c = userInput.charAt(i);
-          if(c == '('){
-              nestedLevel++;
-          }
 
-      }
-    }
 
     private ArrayList<Integer> getTreeArray() {
         return this.treeArray;
     }
-    private void buildFromArray(ArrayList<Integer> values) {
-        treeArray.clear();
-        treeArray.addAll(values);
-        System.out.println("Built tree from array: " + values);
-    }
+
 
 }
