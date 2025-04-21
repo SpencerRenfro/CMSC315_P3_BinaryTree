@@ -33,10 +33,12 @@ public class Main {
                     extractedIntegersFromUserInput.add(Integer.parseInt(integers));
                 }
             }
-            System.out.println("Extracted integers from user input: " + extractedIntegersFromUserInput);
+           // System.out.println("Extracted integers from user input: " + extractedIntegersFromUserInput);
             //The extracted integers are passed to a different binary tree constructor
 
-            System.out.println("This will be more tree output");
+            // print indented tree
+            binaryTree.printIndentedTree();
+            System.out.println("This will be tree category output");
             System.out.println("Do you want to enter another binary tree? (y/n)");
             continueInput = input.nextLine().charAt(0);
 
