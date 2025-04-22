@@ -3,47 +3,65 @@ import java.util.ArrayList;
 
 public class Main {
 
-
-    public static void main(String[] args) throws InvalidTreeSyntaxException {
-
-
+    public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        boolean isValidTreeSyntax = false;
-        char continueInput = ' ';
-        ArrayList<Integer> extractedIntegersFromUserInput = new ArrayList<>();
+        boolean continueInput = true;
 
+        while (continueInput) {
+            try {
+                System.out.print("Enter a binary tree: ");
+                String userInput = input.nextLine();
 
-        // Prompt the user for input until a valid tree syntax is provided
+                System.out.println("Parsing tree: " + userInput);
 
-        while (!isValidTreeSyntax || continueInput != 'n') {
-            System.out.print("Enter a binary tree: ");
-            String userInput = input.nextLine();
-            String[] splitIntegers = userInput.split("[^0-9]+");
+                // Create a new instance of BinaryTree
+                BinaryTree originalTree = new BinaryTree(userInput);
 
+                System.out.println("Tree created successfully");
 
-            //Create a new instance of BinaryTree, this automatically checks for valid input
-            // and throws an exception if the input is invalid
+                // Print the indented tree
+                originalTree.printIndentedTree();
 
-            BinaryTree binaryTree = new BinaryTree(userInput);
-            isValidTreeSyntax = true;
-            // if no errors are thrown from construction, then the input is valid
-            // if the input is valid, then we can extract the integers from the user input
-            for(String integers: splitIntegers){
-                if(!integers.isEmpty()){
-                    extractedIntegersFromUserInput.add(Integer.parseInt(integers));
+                System.out.println("Tree printed successfully");
+
+                // Check if it's a BST and if it's balanced
+                boolean isBST = originalTree.isBinarySearchTree();
+                boolean isBalanced = originalTree.isBalanced();
+
+                // Categorize the tree
+                if (!isBST) {
+                    System.out.println("It is not a binary search tree");
+
+                    // Create a balanced BST with the same values
+                    BinaryTree balancedTree = new BinaryTree(originalTree.getValues());
+                    balancedTree.printIndentedTree();
+
+                    // Display heights
+                    System.out.println("Original tree has height " + originalTree.getHeight());
+                    System.out.println("Balanced tree has height " + balancedTree.getHeight());
+                } else if (isBalanced) {
+                    System.out.println("It is a balanced binary search tree");
+                } else {
+                    System.out.println("It is a binary search tree but it is not balanced");
+
+                    // Create a balanced BST with the same values
+                    BinaryTree balancedTree = new BinaryTree(originalTree.getValues());
+                    balancedTree.printIndentedTree();
+
+                    // Display heights
+                    System.out.println("Original tree has height " + originalTree.getHeight());
+                    System.out.println("Balanced tree has height " + balancedTree.getHeight());
                 }
+            } catch (InvalidTreeSyntaxException e) {
+                System.out.println(e.getMessage());
             }
-           // System.out.println("Extracted integers from user input: " + extractedIntegersFromUserInput);
-            //The extracted integers are passed to a different binary tree constructor
 
-            // print indented tree
-            binaryTree.printIndentedTree();
-            System.out.println("This will be tree category output");
-            System.out.println("Do you want to enter another binary tree? (y/n)");
-            continueInput = input.nextLine().charAt(0);
-
-
+            // Ask if the user wants to continue
+            System.out.print("More trees? Y or N: ");
+            String response = input.nextLine().trim().toUpperCase();
+            continueInput = response.equals("Y");
         }
 
+        input.close();
     }
 }
