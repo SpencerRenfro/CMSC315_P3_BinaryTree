@@ -3,47 +3,52 @@ import java.util.ArrayList;
 
 public class Main {
 
-
     public static void main(String[] args) throws InvalidTreeSyntaxException {
-
-
         Scanner input = new Scanner(System.in);
-        boolean isValidTreeSyntax = false;
-        char continueInput = ' ';
-        ArrayList<Integer> extractedIntegersFromUserInput = new ArrayList<>();
+        boolean continueInput = true;
 
+        while (continueInput) {
+            try {
+                System.out.print("Enter a binary tree: ");
+                String userInput = input.nextLine();
 
-        // Prompt the user for input until a valid tree syntax is provided
+                //Create a new instance of BinaryTree, this automatically checks for valid input
+                // and throws an exception if the input is invalid
 
-        while (!isValidTreeSyntax || continueInput != 'n') {
-            System.out.print("Enter a binary tree: ");
-            String userInput = input.nextLine();
-            String[] splitIntegers = userInput.split("[^0-9]+");
+                BinaryTree binaryTree = new BinaryTree(userInput);
+                // if no errors are thrown from construction, then the input is valid
+                System.out.println("Tree created successfully");
 
+                // print indented tree
+                binaryTree.printIndentedTree();
 
-            //Create a new instance of BinaryTree, this automatically checks for valid input
-            // and throws an exception if the input is invalid
+                // checks  if binaryTree is a binary tree
+                // checks  if it is balanced
+                // checks  if BSt is true and balanced != true, make a new binary search tree that is balanced
+                boolean isBST = binaryTree.isBinarySearchTree();
+                boolean isBalanced = binaryTree.isBalanced(binaryTree.getRoot());
+                if(!isBST){
+                    System.out.println("It is not a binary search tree");
+                } else if(isBalanced){
+                    System.out.println("It is a balanced binary search tree");
 
-            BinaryTree binaryTree = new BinaryTree(userInput);
-            isValidTreeSyntax = true;
-            // if no errors are thrown from construction, then the input is valid
-            // if the input is valid, then we can extract the integers from the user input
-            for(String integers: splitIntegers){
-                if(!integers.isEmpty()){
-                    extractedIntegersFromUserInput.add(Integer.parseInt(integers));
+                } else {
+                    System.out.println("It is a binary search tree but it is not balanced");
+                    BinaryTree balancedTree = new BinaryTree(binaryTree.getTreeValues());
+                    balancedTree.printIndentedTree();
+                    System.out.println("Original tree has height " + binaryTree.getHeight(binaryTree.getRoot()));
+                    System.out.println("Balanced tree has height " + balancedTree.getHeight(balancedTree.getRoot()));
                 }
+
+            } catch(InvalidTreeSyntaxException e) {
+                System.out.println(e.getMessage());
             }
-           // System.out.println("Extracted integers from user input: " + extractedIntegersFromUserInput);
-            //The extracted integers are passed to a different binary tree constructor
 
-            // print indented tree
-            binaryTree.printIndentedTree();
-            System.out.println("This will be tree category output");
-            System.out.println("Do you want to enter another binary tree? (y/n)");
-            continueInput = input.nextLine().charAt(0);
-
-
+            // Prompt the user if they want more trees
+            System.out.print("More trees? Y or N: ");
+            String response = input.nextLine().trim().toUpperCase();
+            continueInput = response.equals("Y");
         }
-
+        input.close();
     }
 }

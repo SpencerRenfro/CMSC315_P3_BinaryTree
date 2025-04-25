@@ -1,122 +1,185 @@
 import java.util.ArrayList;
-
 import java.util.Stack;
+import java.util.Collections;
 
 public final class BinaryTree {
 
-    private final ArrayList<String> errorMessages = new ArrayList<>();
-    private final ArrayList<Integer> treeArray = new ArrayList<>();
-    String userInput;
+    // inner class for the tree nodes, lef and right child are null by default
+    public static class TreeNode {
+        int value;
+        TreeNode left;
+        TreeNode right;
 
-    //A constructor that accepts a string containing the preorder representation of a binary tree
-    //and constructs a binary tree
+        TreeNode(int value) {
+            this.value = value;
+            this.left = null;
+            this.right = null;
+        }
+    }
+
+    private final ArrayList<String> errorMessages = new ArrayList<>();
+    private final ArrayList<Integer> treeValues = new ArrayList<>();
+    private final TreeNode root;
+
+
+    /*
+    A constructor that accepts a string containing the preorder representation of a binary tree from the user,
+    removes all whitespace, and calls internal method to check for valid input,
+    and if valid, calls another internal method to parse the string and construct the binary tree.
+    */
     public BinaryTree(String userInput) throws InvalidTreeSyntaxException {
         // remove all whitespace
         userInput = userInput.replaceAll("\\s+", "");
-        this.userInput = userInput;
+        //System.out.println("Your input with spaces removed:" + userInput);
 
-        if(this.isValidInput(userInput)){
-            //parse the string and construct the binary tree
-            //this is a placeholder for the actual implementation
-           // System.out.println("Valid input: " + userInput);
-
+        if (this.isValidInput(userInput)) {
+            this.root = buildTreeFromPreorder(userInput);
         } else {
             throw new InvalidTreeSyntaxException(String.join("\n", errorMessages));
         }
+
     }
 
+    //this constructor accepts an array list of integers, sorts the values, constructs a balanced binary search tree
 
-    // public method that prints the indented tree
-    public void printIndentedTree() {
-        ArrayList<Test.Node> nodeList = new ArrayList<>();
-        Stack<Test.ParseFrame> stack = new Stack<>();
-        StringBuilder numberBuffer = new StringBuilder();
-        StringBuilder treeMapString = new StringBuilder();
-        String treeMapStringFinal = null;
-        int level = 0;
+    public BinaryTree(ArrayList<Integer> values) {
+        // adds values from get
+        this.treeValues.addAll(values);
+        //sort the values
+        Collections.sort(this.treeValues);
+        this.root = buildBalancedBST(this.treeValues, 0, this.treeValues.size() - 1);
+    }
 
-        for (int i = 0; i < this.userInput.length(); i++) {
-            char c = this.userInput.charAt(i);
+    //Builds a balanced binary search tree from an array of integers
+    private TreeNode buildBalancedBST(ArrayList<Integer> sortedValues, int start, int end) {
+       if(start > end) {
+           return null;
+       }
+       // get the middle element, put it as the root, then recursively build the left and right subtrees
+        int mid = (start + end) / 2;
+       TreeNode node = new TreeNode(sortedValues.get(mid));
+       node.left = buildBalancedBST(sortedValues, start, mid -1);
+       node.right = buildBalancedBST(sortedValues, mid +1, end);
+       return node;// returns the root of each subtree
+    }
+    // Builds a binary tree from the preorder user input
+    private TreeNode buildTreeFromPreorder (String userInput){
+        /*
+         create a wrapper class to hold the current index, used for index tracking during recursion
+         this cannot be a primitive type because that would be passed by value and not by reference
+         and would not be updated during recursion
+        */
+        int[] index = {0};
+        return parsePreorder(userInput, index);
+    }
 
-            if (c == ' ') continue;
+    private TreeNode parsePreorder (String preorder,int[] index){
 
-            switch (c) {
-                case '(' -> {
-                    level++;
-                    stack.push(new Test.ParseFrame(level));
-                }
-                case ')' -> {
-                    Test.ParseFrame frame = stack.pop();
-                    if (frame.value != null) {
-                        int tempLevel = frame.level;
-                        Test.Node node = new Test.Node(frame.level, frame.value, frame.asteriskCount);
-                        nodeList.add(node);
-                        while(tempLevel != 1) {
-                            treeMapString.append("\t");
-                            tempLevel--;
-                        }
-                        treeMapString.append(node.value).append("\n");
-                       // System.out.println(frame.asteriskCount + " asterisks for value " + frame.value);
-                    }
-                    level--;
-                }
-                case '*' -> {
-                    if (!stack.isEmpty()) {
-                        stack.peek().asteriskCount++;
-                    }
-                }
-                default -> {
-                    if (Character.isDigit(c)) {
-                        numberBuffer.append(c);
-                        if (i == userInput.length() - 1 || !Character.isDigit(userInput.charAt(i + 1))) {
-                            int val = Integer.parseInt(numberBuffer.toString());
-                            if (!stack.isEmpty()) {
-                                stack.peek().value = val;
-                            }
-                            numberBuffer.setLength(0);
-                        }
-                    }
-                }
-            }
+        // check for end of string
+        if (index[0] >= preorder.length()) return null;
+        // check for asterisk
+        if (preorder.charAt(index[0]) == '*') {
+            index[0]++;
+            return null;
+        }
+        if (preorder.charAt(index[0]) == '(') {
+            index[0]++;
+        }
+        // check for asterisk right after the opening parenthesis
+        if (index[0] < preorder.length() && preorder.charAt(index[0]) == '*') {
+            index[0]++;
+            return null;
         }
 
-       // System.out.println("\nFinal Nodes:");
-        //nodeList.forEach(System.out::println);
-        //System.out.println("\nBinary Tree String:");
+        //check for closing )
+        if (index[0] < preorder.length() && preorder.charAt(index[0]) == ')') {
+            index[0]++;
+            return null;
+        }
 
-        treeMapStringFinal = treeMapString.toString();
-        System.out.println(treeMapStringFinal);
+        // parse the value
+        StringBuilder stringValue = new StringBuilder();
+        while (index[0] < preorder.length() && Character.isDigit(preorder.charAt(index[0]))) {
+            stringValue.append(preorder.charAt(index[0]));
+            index[0]++;
+        }
+
+        int value = Integer.parseInt(stringValue.toString());
+        TreeNode node = new TreeNode(value);
+        node.left = parsePreorder(preorder, index);
+        node.right = parsePreorder(preorder, index);
+
+        // skip closing parenthesis
+        if (index[0] < preorder.length() && preorder.charAt(index[0]) == ')') {
+            index[0]++;
+        }
+        return node;
     }
 
+
+
+    /*
+    Recursive method to check if the tree is a binary search tree,
+    this takes in the root node and the min and max values for the current subtree,
+    the default values for min and max are Integer.MIN_VALUE and Integer.MAX_VALUE,
+    then the max parameter is updated to the value of the current node,
+    and the min parameter is updated to the value of the current node's parent node.
+
+     */
+
+    public boolean isBinarySearchTree() {
+        return isBST(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+    private boolean isBST(TreeNode node, int min, int max) {
+        // empty tree
+        if(node == null) return true;
+
+        // check if the current node's value is within the valid range
+        if(node.value <= min || node.value >= max) return false;
+
+        // recursively check the left and right subtrees
+        return isBST(node.left, min, node.value) && isBST(node.right, node.value, max);
+    }
+
+
+
+
     // check for valid input
-    private boolean isValidInput(String userInput){
+    private boolean isValidInput(String userInput) {
         boolean isValid = true;
         Stack<Character> stack = new Stack<>();
-        // check for valid input
+        StringBuilder buffer = new StringBuilder();
+        treeValues.clear();
         String message = "";
-        for(int i = 0; i < userInput.length(); i++){
+        for (int i = 0; i < userInput.length(); i++) {
             char c = userInput.charAt(i);
             char prevChar = i > 0 ? userInput.charAt(i - 1) : ' ';
-            char nextChar = i < userInput.length() - 1 ? userInput.charAt(i + 1) : ' ';
-            //checks for integers and if true adds them to the tree array
-            if(Character.isDigit(c)){
-                treeArray.add(Character.getNumericValue(c));
-            }
+
+
             // checks for any invalid characters other than integers, spaces, parenthesis and asterisks
-            if(!Character.isDigit(c) && c != ' ' && c != '(' && c != ')' && c != '*'){
+            if (!Character.isDigit(c) && c != ' ' && c != '(' && c != ')' && c != '*') {
                 isValid = false;
                 message = "Invalid syntax: Data is not an Integer";
                 this.errorMessages.add(message);
 
             }
-            if(c == '('){
+
+            //process integers
+            if(Character.isDigit(c)) {
+                buffer.append(c);
+                // If the next character is not a digit or it's the last character, add the number to the list
+                if(i == userInput.length() -1 || !Character.isDigit(userInput.charAt(i + 1))) {
+                    treeValues.add(Integer.parseInt(buffer.toString()));
+                    buffer.setLength(0);
+                }
+            }
+
+            // processes parenthesis
+            if (c == '(') {
                 stack.push(c);
-//                if(Character.isDigit(nextChar) && nextChar != '*' && nextChar != ')'){
-//                    isValid = false;
-//                    message = "Invalid syntax: Data is not an Integer";
-//                }
-            } else if(c == ')'){
-                if(stack.isEmpty()){
+            } else if (c == ')') {
+                if (stack.isEmpty()) {
                     isValid = false;
                     message = "Invalid syntax: Missing Left Parenthesis";
                     this.errorMessages.add(message);
@@ -124,7 +187,7 @@ public final class BinaryTree {
                     isValid = false;
                     message = "Invalid syntax: Empty parentheses";
                     this.errorMessages.add(message);
-                } else if(stack.pop() != '('){
+                } else if (stack.pop() != '(') {
                     isValid = false;
                     message = "Invalid syntax: Missing Right Parenthesis";
                     this.errorMessages.add(message);
@@ -132,17 +195,17 @@ public final class BinaryTree {
                 }
             }
         }
-        // check for unmatched opening parenthesis
-        if(!stack.isEmpty()){
+        // check for unmatched opening parenthesis after parsing the string
+        if (!stack.isEmpty()) {
             char[] unmatchedCharArray = new char[stack.size()];
             isValid = false;
-            for(int i = 0; i < stack.size(); i++){
+            for (int i = 0; i < stack.size(); i++) {
                 unmatchedCharArray[i] = stack.pop();
-                if(unmatchedCharArray[i] == '('){
+                if (unmatchedCharArray[i] == '(') {
                     message = "Invalid syntax: Missing Right Parenthesis";
                     this.errorMessages.add(message);
 
-                } else if(unmatchedCharArray[i] == ')'){
+                } else if (unmatchedCharArray[i] == ')') {
                     message = "Invalid syntax: Missing Left Parenthesis";
                     this.errorMessages.add(message);
                 }
@@ -151,18 +214,72 @@ public final class BinaryTree {
         }
 
         // checks for extra characters at the end
-        if(!userInput.endsWith(")")){
+        if (!userInput.endsWith(")")) {
             isValid = false;
             errorMessages.add("Invalid syntax: Extra characters at the end");
         }
 
+        //ADD CHECK FOR INCOMPLETE TREE
+
         return isValid;
     }
 
-
-    private ArrayList<Integer> getTreeArray() {
-        return this.treeArray;
+    // public method that prints the indented tree
+    public void printIndentedTree () {
+        printIndentedTree(this.root, 0);
     }
 
+    public void printIndentedTree (TreeNode node,int level){
+        if (node == null) return;
+
+        for (int i = 0; i < level; i++) {
+            System.out.print("\t");
+        }
+        System.out.println(node.value);
+        printIndentedTree(node.left, level + 1);
+        printIndentedTree(node.right, level + 1);
+
+    }
+
+    public boolean isBalanced(TreeNode node) {
+        if(node == null) return true;
+
+        int leftHeight = getHeight(node.left);
+        int rightHeight = getHeight(node.right);
+
+        if(Math.abs(leftHeight - rightHeight) > 1) return false;
+
+        return isBalanced(node.left) && isBalanced(node.right);
+    }
+
+    public int getHeight(TreeNode node) {
+        if(node == null) return 0;
+        return 1 + Math.max(getHeight(node.left), getHeight(node.right));
+
+    }
+
+    public ArrayList<Integer> getTreeValues() {
+        ArrayList<Integer> values = new ArrayList<>();
+        inOrderTraversal(this.root, values);
+        return values;
+    }
+
+    /*
+    private method that performs an in-order traversal of the tree and adds the values to a
+    local array list passed as a parameter called in getTreeValues.
+    This recursively calls itself to traverse the tree left to right.
+    */
+    private void inOrderTraversal(TreeNode node, ArrayList<Integer> values) {
+        if(node == null) return;
+        inOrderTraversal(node.left, values);
+        values.add(node.value);
+        inOrderTraversal(node.right, values);
+
+    }
+
+    public TreeNode getRoot() {
+        return this.root;
+
+    }
 
 }
