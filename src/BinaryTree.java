@@ -21,7 +21,6 @@ public final class BinaryTree {
     private final ArrayList<Integer> treeValues = new ArrayList<>();
     private final TreeNode root;
 
-
     /*
     A constructor that accepts a string containing the preorder representation of a binary tree from the user,
     removes all whitespace, and calls internal method to check for valid input,
@@ -40,8 +39,7 @@ public final class BinaryTree {
 
     }
 
-    //this constructor accepts an array list of integers, sorts the values, constructs a balanced binary search tree
-
+    //Method overload constructor: accepts an array list of integers, sorts the values, constructs a balanced binary search tree
     public BinaryTree(ArrayList<Integer> values) {
         // adds values from get
         this.treeValues.addAll(values);
@@ -74,7 +72,6 @@ public final class BinaryTree {
     }
 
     private TreeNode parsePreorder (String preorder,int[] index){
-
         // check for end of string
         if (index[0] >= preorder.length()) return null;
         // check for asterisk
@@ -91,7 +88,7 @@ public final class BinaryTree {
             return null;
         }
 
-        //check for closing )
+        //check for closing ')'
         if (index[0] < preorder.length() && preorder.charAt(index[0]) == ')') {
             index[0]++;
             return null;
@@ -109,14 +106,12 @@ public final class BinaryTree {
         node.left = parsePreorder(preorder, index);
         node.right = parsePreorder(preorder, index);
 
-        // skip closing parenthesis
+        // skip closing ')'
         if (index[0] < preorder.length() && preorder.charAt(index[0]) == ')') {
             index[0]++;
         }
         return node;
     }
-
-
 
     /*
     Recursive method to check if the tree is a binary search tree,
@@ -124,9 +119,9 @@ public final class BinaryTree {
     the default values for min and max are Integer.MIN_VALUE and Integer.MAX_VALUE,
     then the max parameter is updated to the value of the current node,
     and the min parameter is updated to the value of the current node's parent node.
-
      */
 
+   // range of values from -2147483648 to 2147483648
     public boolean isBinarySearchTree() {
         return isBST(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
@@ -142,29 +137,30 @@ public final class BinaryTree {
         return isBST(node.left, min, node.value) && isBST(node.right, node.value, max);
     }
 
-
-
-
-    // check for valid input
+    /*
+        Checks if the input is valid, returns true if it is valid, false otherwise.
+        Parameter is the user input string with whitespace removed
+    */
     private boolean isValidInput(String userInput) {
+
+        errorMessages.clear(); // clear any previous error messages, if any.
+        treeValues.clear(); // clear any values in case this is not empty.
         boolean isValid = true;
         Stack<Character> stack = new Stack<>();
+        // buffer is used to store the current number being parsed, once the end of the number is reached, the value is added to the treeValues and the buffer is cleared
         StringBuilder buffer = new StringBuilder();
-        treeValues.clear();
-        String message = "";
+        String message = ""; // used to store error message, this is added to the errorMessages array list
+
         for (int i = 0; i < userInput.length(); i++) {
             char c = userInput.charAt(i);
             char prevChar = i > 0 ? userInput.charAt(i - 1) : ' ';
-
 
             // checks for any invalid characters other than integers, spaces, parenthesis and asterisks
             if (!Character.isDigit(c) && c != ' ' && c != '(' && c != ')' && c != '*') {
                 isValid = false;
                 message = "Invalid syntax: Data is not an Integer";
                 this.errorMessages.add(message);
-
             }
-
             //process integers
             if(Character.isDigit(c)) {
                 buffer.append(c);
@@ -174,7 +170,6 @@ public final class BinaryTree {
                     buffer.setLength(0);
                 }
             }
-
             // processes parenthesis
             if (c == '(') {
                 stack.push(c);
@@ -191,7 +186,6 @@ public final class BinaryTree {
                     isValid = false;
                     message = "Invalid syntax: Missing Right Parenthesis";
                     this.errorMessages.add(message);
-
                 }
             }
         }
@@ -210,17 +204,12 @@ public final class BinaryTree {
                     this.errorMessages.add(message);
                 }
             }
-
         }
-
         // checks for extra characters at the end
         if (!userInput.endsWith(")")) {
             isValid = false;
             errorMessages.add("Invalid syntax: Extra characters at the end");
         }
-
-        //ADD CHECK FOR INCOMPLETE TREE
-
         return isValid;
     }
 
@@ -253,9 +242,8 @@ public final class BinaryTree {
     }
 
     public int getHeight(TreeNode node) {
-        if(node == null) return 0;
+        if(node == null) return -1; // return -1 for null nodes
         return 1 + Math.max(getHeight(node.left), getHeight(node.right));
-
     }
 
     public ArrayList<Integer> getTreeValues() {
@@ -279,7 +267,6 @@ public final class BinaryTree {
 
     public TreeNode getRoot() {
         return this.root;
-
     }
 
 }
